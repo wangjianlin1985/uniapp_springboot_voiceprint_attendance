@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ttitcn.system.dao.SysAttDao" >
+	
+	<sql id="selectAllVO">
+		select 
+			a.id,
+			a.date,
+			a.time,
+			a.status,
+			a.user_id as "user.userId",
+			b.user_name as "user.userName",
+			b.login_name as "user.loginName"
+		from sys_att a 
+			left join sys_user b on a.user_id = b.user_id
+	</sql>
+	
+	<select id="list" parameterType="SysAtt" resultType="SysAtt">
+		<include refid="selectAllVO"/>
+        where 1 = 1
+        <if test="date != null and '' != date">
+        	and a.date = #{date}
+        </if>
+        <if test="status != null">
+        	and a.status = #{status}
+        </if>
+        <if test="user != null and user.userId != null">
+        	and a.user_id = #{user.userId}
+        </if>
+        <if test="user != null and user.userName != null and user.userName != ''">
+        	and b.user_name like concat('%', #{user.userName},'%')
+        </if>
+        <if test="user != null and user.loginName != null and user.loginName != ''">
+        	and b.login_name like concat('%', #{user.loginName},'%')
+        </if>
+        order by a.date desc
+	</select>
+	
+	<select id="getById" parameterType="Long" resultType="SysAtt">
+		<include refid="selectAllVO" />
+		where a.id = #{id}
+	</select>
+
+	<select id="getByUserAndDate" parameterType="SysAtt"   resultType="SysAtt">
+		<include refid="selectAllVO" /> where a.date = #{date} and a.user_id = #{user.userId} limit 1
+	</select>
+	
+	<update id="updateByUserAndDate" parameterType="SysAtt">
+        update sys_att
+        set time = #{time}, status = #{status}
+        where date = #{date} and user_id = #{user.userId}
+    </update>
+    
+    <update id="update" parameterType="SysAtt">
+        update sys_att
+        set time = #{time}, status = #{status}
+        where id = #{id}
+    </update>
+    
+    <insert id="add" parameterType="SysAtt" useGeneratedKeys="true" keyProperty="id" >
+        insert into sys_att(date,user_id,time,status) values (#{date},#{user.userId},#{time},#{status})
+    </insert>
+
+
+</mapper>
